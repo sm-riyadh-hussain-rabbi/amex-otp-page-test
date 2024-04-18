@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Cybs OTP Page</title>
+    <title>Citybank OTP Page</title>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -17,192 +17,70 @@
       <section
         class="d-flex flex-column justify-content-center align-items-center gap-5 col"
       >
-        <!-- Device Data Collection -->
-        <div class="card" style="min-width: 350px">
-          <div class="card-header">Device Data Collection</div>
+        <!-- USER INPUT -->
+        <div class="card" style="min-width: 380px">
+          <div class="card-header">Citybank OTP</div>
           <div class="card-body d-flex flex-column">
-            <div class="mb-3">
-              <label for="device_data_collection_url" class="form-label"
-                >Device data collection URL</label
+            <div class="mb-3 form-group row">
+              <label for="acsUrlInput" class="col-sm-3 col-form-label"
+                >ACS Url</label
               >
-              <input
-                type="text"
-                id="device_data_collection_url"
-                name="device_data_collection_url"
-                class="form-control"
-                value="https://centinelapistag.cardinalcommerce.com/V1/Cruise/Collect"
-              />
+              <div class="col-sm-9">
+                <input
+                  type="text"
+                  id="acsUrlInput"
+                  name="acsUrlInput"
+                  class="form-control"
+                  value="https://sandbox.thecitybank.com:4333"
+                />
+              </div>
             </div>
-            <div class="mb-3">
-              <label
-                for="device_data_collection_access_token"
-                class="form-label"
-                >Access token</label
-              >
-              <input
-                type="text"
-                id="device_data_collection_access_token"
-                name="device_data_collection_access_token"
-                class="form-control"
-              />
+            <div class="mb-3 form-group row">
+              <label for="creq" class="col-sm-3 col-form-label">CReq</label>
+              <div class="col-sm-9">
+                <input
+                  type="text"
+                  id="creqInput"
+                  name="creqInput"
+                  class="form-control"
+                />
+              </div>
             </div>
-            <button
-              onclick="initDeviceDataCollection()"
-              class="btn btn-primary mt-1"
-            >
-              Start Device Data Collection
-            </button>
-          </div>
-        </div>
-
-        <!-- OTP -->
-        <div class="card" style="min-width: 350px">
-          <div class="card-header">Step Up (OTP)</div>
-          <div class="card-body d-flex flex-column">
-            <div class="mb-3">
-              <label for="step_up_url" class="form-label">Setup URL</label>
-              <input
-                type="text"
-                id="step_up_url"
-                name="step_up_url"
-                class="form-control"
-                value="https://centinelapistag.cardinalcommerce.com/V2/Cruise/StepUp"
-              />
-            </div>
-            <div class="mb-3">
-              <label for="step_up_access_token" class="form-label"
-                >Access token</label
-              >
-              <input
-                type="text"
-                id="step_up_access_token"
-                name="step_up_access_token"
-                class="form-control"
-              />
-            </div>
-            <button onclick="initSetUpProcess()" class="btn btn-primary mt-1">
-              Start Step Up Process
+            <button onclick="initOTP()" class="btn btn-primary mt-1">
+              Start OTP Process
             </button>
           </div>
         </div>
       </section>
-      <section class="d-flex justify-content-center align-items-center col">
-        <!-- OTP -->
-        <iframe
-          id="step_up_iframe"
-          name="step_up_iframe"
-          width="480px"
-          height="853px"
-          class="border rounded"
-        ></iframe>
-        <form id="step_up_form" method="POST" target="step_up_iframe">
-          <input id="step_up_form_input" type="hidden" name="JWT" />
-        </form>
-
-        <!-- Device Data Collection -->
-        <iframe
-          id="cardinal_collection_iframe"
-          name="collectionIframe"
-          width="10"
-          height="10"
-          class="invisible"
-        ></iframe>
-        <form
-          id="cardinal_collection_form"
-          method="POST"
-          target="collectionIframe"
-        >
-          <input id="cardinal_collection_form_input" type="hidden" name="JWT" />
-        </form>
-      </section>
+      <!-- OTP -->
+      <form
+        id="payment_form"
+        method="POST"
+        name="theForm"
+        role="form"
+        action=""
+      >
+        <input type="hidden" id="creq" name="creq" value="" />
+      </form>
     </main>
     <script type="text/javascript">
-      window.onload = () => {
-        let sessionId = 'your-session-id'
-        sessionStorage.setItem('sessionId', sessionId)
-        let retrievedSessionId = sessionStorage.getItem('sessionId')
-        console.log(retrievedSessionId)
-      }
-
-      const initDeviceDataCollection = () => {
+      const initOTP = () => {
         try {
-          const deviceDataCollectionUrl = document.getElementById(
-            'device_data_collection_url'
-          ).value
-          const accessToken = document.getElementById(
-            'device_data_collection_access_token'
-          ).value
+          const acsUrl = document.getElementById('acsUrlInput').value
+          const creq = document.getElementById('creqInput').value
 
-          if (deviceDataCollectionUrl === '' || accessToken === '') {
-            return console.error(
-              'Enter device_data_collection_url and/or device_data_collection_access_token'
-            )
+          if (acsUrl === '' || creq === '') {
+            return console.error('Enter acsUrl and/or creq')
           }
 
           document
-            .getElementById('cardinal_collection_form')
-            ?.setAttribute('action', deviceDataCollectionUrl)
-          document
-            .getElementById('cardinal_collection_form_input')
-            ?.setAttribute('value', accessToken)
+            .getElementById('payment_form')
+            ?.setAttribute('action', acsUrl)
+          document.getElementById('creq')?.setAttribute('value', creq)
 
-          console.log('Starting...')
-          document.getElementById('cardinal_collection_form')?.submit()
-          window.addEventListener(
-            'message',
-            function (event) {
-              if (
-                event.origin === 'https://centinelapistag.cardinalcommerce.com'
-              ) {
-                const data = JSON.parse(event.data)
-                if (data && data.Status) {
-                  console.log('DONE:', data)
-                }
-              }
-            },
-            false
-          )
-        } catch (err) {
-          console.error(err)
-        }
-      }
+          console.log(document.getElementById('payment_form'))
 
-      const initSetUpProcess = () => {
-        try {
-          const stepUpUrl = document.getElementById('step_up_url').value
-          const accessToken = document.getElementById(
-            'step_up_access_token'
-          ).value
-
-          if (stepUpUrl === '' || accessToken === '') {
-            return console.error(
-              'Enter step_up_url and/or step_up_access_token'
-            )
-          }
-
-          document
-            .getElementById('step_up_form')
-            ?.setAttribute('action', stepUpUrl)
-          document
-            .getElementById('step_up_form_input')
-            ?.setAttribute('value', accessToken)
-
-          document.getElementById('step_up_form')?.submit()
-
-          window.addEventListener(
-            'message',
-            function (event) {
-              if (
-                event.origin === 'https://centinelapistag.cardinalcommerce.com'
-              ) {
-                const data = JSON.parse(event.data)
-                if (data && data.Status) {
-                  console.log('DONE:', data)
-                }
-              }
-            },
-            false
-          )
+          document.getElementById('payment_form')?.submit()
         } catch (err) {
           console.error(err)
         }
